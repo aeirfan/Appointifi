@@ -234,5 +234,3 @@ git add README.md
 git commit -m "Add README"
 git push origin main
 ```
-
-If you want, I can prepare a commit or a pull request for you — tell me how you'd like to proceed.
