@@ -24,12 +24,12 @@ if (app()->environment('local')) {
         if (!$appointment) return 'No appointments found. Please create an appointment first.';
         return new \App\Mail\BookingCreatedCustomer($appointment);
     });
-    
+
     Route::get('/test-email/send', function () {
         $appointment = \App\Models\Appointment::with(['customer', 'business', 'service'])->latest()->first();
         if (!$appointment) return 'No appointments found. Please create an appointment first.';
         \Illuminate\Support\Facades\Mail::to($appointment->customer->email)->send(new \App\Mail\BookingCreatedCustomer($appointment));
-        return 'Email sent! Check storage/logs/laravel.log';
+        return 'Email sent! Check Mailpit at http://localhost:8025';
     });
 }
 
@@ -54,7 +54,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/businesses/{business}', [BusinessSearchController::class, 'show'])->name('bookings.show');
     Route::get('/businesses/{business}/services/{service}/availability', [AvailabilityController::class, 'show'])->name('bookings.availability');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
-    
+
     // My bookings
     Route::get('/my-bookings', [BookingController::class, 'index'])->name('bookings.my-bookings');
     Route::patch('/bookings/{appointment}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');

@@ -1,7 +1,21 @@
-import './bootstrap';
+import "./bootstrap";
 
-import Alpine from 'alpinejs';
+// Configure Alpine before Livewire loads it
+document.addEventListener("alpine:init", () => {
+    // Livewire 3 already includes persist plugin, no need to import/register it
 
-window.Alpine = Alpine;
+    Alpine.store("sidebar", {
+        collapsed: Alpine.$persist(false).as("sidebar-collapsed"),
+        toggle() {
+            this.collapsed = !this.collapsed;
+        },
+    });
 
-Alpine.start();
+    Alpine.store(
+        "darkMode",
+        Alpine.$persist(
+            localStorage.getItem("darkMode") === "true" ||
+                document.documentElement.classList.contains("dark")
+        ).as("dark-mode")
+    );
+});

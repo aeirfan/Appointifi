@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Events\AppointmentStatusUpdated;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -67,8 +68,12 @@ class AppointmentController extends Controller
         }
 
         $appointment = $business->appointments()->findOrFail($appointmentId);
+        $oldStatus = $appointment->status; // Capture old status before updating
         $appointment->status = $validated['status'];
         $appointment->save();
+
+        // Notify via domain event when owner updates status (listeners handle email delivery)
+        event(new AppointmentStatusUpdated($appointment, $oldStatus, $validated['status']));
 
         return redirect()->back()->with('status', 'Appointment status updated to ' . ucfirst($validated['status']));
     }

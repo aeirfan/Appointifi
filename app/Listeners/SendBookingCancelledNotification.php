@@ -3,6 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\BookingCancelled;
+use App\Mail\BookingCancelledCustomer;
+use App\Mail\BookingCancelledOwner;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Mail;
@@ -19,15 +21,11 @@ class SendBookingCancelledNotification implements ShouldQueue
         $appointment = $event->appointment->load(['customer', 'business.owner', 'service']);
 
         // Send email to customer
-        Mail::send('emails.booking-cancelled-customer', ['appointment' => $appointment], function ($message) use ($appointment) {
-            $message->to($appointment->customer->email, $appointment->customer->name)
-                    ->subject('Booking Cancelled - ' . $appointment->business->name);
-        });
+        Mail::to($appointment->customer->email)
+            ->send(new BookingCancelledCustomer($appointment));
 
         // Send email to business owner
-        Mail::send('emails.booking-cancelled-owner', ['appointment' => $appointment], function ($message) use ($appointment) {
-            $message->to($appointment->business->owner->email, $appointment->business->owner->name)
-                    ->subject('Booking Cancelled - ' . $appointment->service->name);
-        });
+        Mail::to($appointment->business->owner->email)
+            ->send(new BookingCancelledOwner($appointment));
     }
 }

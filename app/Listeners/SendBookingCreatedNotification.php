@@ -3,6 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\BookingCreated;
+use App\Mail\BookingCreatedCustomer;
+use App\Mail\BookingCreatedOwner;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Mail;
@@ -19,15 +21,11 @@ class SendBookingCreatedNotification implements ShouldQueue
         $appointment = $event->appointment->load(['customer', 'business.owner', 'service']);
 
         // Send email to customer
-        Mail::send('emails.booking-created-customer', ['appointment' => $appointment], function ($message) use ($appointment) {
-            $message->to($appointment->customer->email, $appointment->customer->name)
-                    ->subject('Booking Confirmation - ' . $appointment->business->name);
-        });
+        Mail::to($appointment->customer->email)
+            ->send(new BookingCreatedCustomer($appointment));
 
         // Send email to business owner
-        Mail::send('emails.booking-created-owner', ['appointment' => $appointment], function ($message) use ($appointment) {
-            $message->to($appointment->business->owner->email, $appointment->business->owner->name)
-                    ->subject('New Booking Received - ' . $appointment->service->name);
-        });
+        Mail::to($appointment->business->owner->email)
+            ->send(new BookingCreatedOwner($appointment));
     }
 }
